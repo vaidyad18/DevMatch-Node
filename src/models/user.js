@@ -5,23 +5,39 @@ const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
+    googleId: {
+      type: String,
+      unique: true,
+      sparse: true, // important: allows either googleId OR email
+    },
     firstName: {
       type: String,
       required: true,
       trim: true,
       minlength: 3,
       maxlength: 20,
+      required: function () {
+        return !this.googleId; // required only if not a Google user
+      },
     },
     lastName: {
       type: String,
+      trim: true,
+    },
+    name: {
+      type: String, // used for Google full name
       trim: true,
     },
     emailId: {
       type: String,
       required: true,
       unique: true,
+      sparse: true,
       trim: true,
       lowercase: true,
+      required: function () {
+        return !this.googleId; // required only if not a Google user
+      },
       validate(value) {
         if (!validator.isEmail(value)) {
           throw new Error("Email is invalid");
@@ -32,10 +48,16 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      validate(value) {
-        if (!validator.isStrongPassword(value)) {
-          throw new Error("Password is not strong enough");
-        }
+      required: function () {
+        return !this.googleId; // required only if not a Google user
+      },
+      validate: {
+        validator: function (value) {
+          // Skip validation for Google OAuth users
+          if (this.googleId) return true;
+          return validator.isStrongPassword(value);
+        },
+        message: "Password is not strong enough",
       },
     },
     age: {
@@ -46,6 +68,7 @@ const userSchema = new mongoose.Schema(
       type: Number,
       unique: true,
       trim: true,
+      sparse: true,
     },
     gender: {
       type: String,
@@ -80,11 +103,11 @@ const userSchema = new mongoose.Schema(
       required: true,
       default: "Student",
     },
-    experience:{
+    experience: {
       type: String,
       required: true,
       default: "Fresher",
-      enum: ['Fresher', 'Beginner', 'Intermediate', 'Advanced'],
+      enum: ["Fresher", "Beginner", "Intermediate", "Advanced"],
     },
     linkedin: {
       type: String,
@@ -92,7 +115,7 @@ const userSchema = new mongoose.Schema(
         if (value && !validator.isURL(value)) {
           throw new Error("Not a valid URL");
         }
-      }
+      },
     },
     github: {
       type: String,
@@ -100,15 +123,15 @@ const userSchema = new mongoose.Schema(
         if (value && !validator.isURL(value)) {
           throw new Error("Not a valid URL");
         }
-      }
+      },
     },
-    website:{
+    website: {
       type: String,
       validate(value) {
         if (value && !validator.isURL(value)) {
           throw new Error("Not a valid URL");
         }
-      }
+      },
     },
     isPremium: {
       type: Boolean,
@@ -116,25 +139,28 @@ const userSchema = new mongoose.Schema(
     },
     membershipType: {
       type: String,
-    }
+    },
   },
   {
     timestamps: true,
   }
 );
 
-userSchema.index({firstName:1, lastName:1});
+userSchema.index({ firstName: 1, lastName: 1 });
 
 userSchema.methods.getJWT = async function () {
   const user = this;
-  const token = jwt.sign({ _id: user._id }, "Vaidya@18#",{ expiresIn: '1d' });
+  const token = jwt.sign({ _id: user._id }, "Vaidya@18#", { expiresIn: "1d" });
   return token;
 };
 
 userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const user = this;
   const hashedPassword = user.password;
-  const isPassordValid = await bcrypt.compare(passwordInputByUser, hashedPassword);
+  const isPassordValid = await bcrypt.compare(
+    passwordInputByUser,
+    hashedPassword
+  );
   return isPassordValid;
 };
 
