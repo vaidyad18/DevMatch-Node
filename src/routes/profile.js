@@ -52,7 +52,7 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     await loggedInUser.save();
     res.json({ message: "Password updated successfully",data:loggedInUser.password });
   } catch (err) {
-    res.status(400).send("Error deleting profile: " + err.message);
+    res.status(400).send(err.message);
   }
 });
 
