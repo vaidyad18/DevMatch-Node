@@ -24,7 +24,6 @@ authRouter.post("/signup", async (req, res) => {
     const savedUser = await user.save();
     const token = await savedUser.getJWT();
     res.cookie("token", token, { expires: new Date(Date.now() + 86400000) });
-    res.send(user);
     res.json({ message: "Success", data: savedUser });
   } catch (err) {
     res.status(400).send("Error registering user: " + err.message);
@@ -73,19 +72,16 @@ authRouter.get(
 
     // ✅ Cookie setup for local dev
     res.cookie("token", token, {
-  httpOnly: true,
-  secure: true,        // ✅ Chrome requires this when sameSite: "None"
-  sameSite: "None",    // ✅ allows cross-origin between ports
-  path: "/",           // ✅ all routes can access
-  expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
-});
-
+      httpOnly: true,
+      secure: true, // ✅ Chrome requires this when sameSite: "None"
+      sameSite: "None", // ✅ allows cross-origin between ports
+      path: "/", // ✅ all routes can access
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
 
     // ✅ Redirect without token in URL
     res.redirect(`${process.env.FRONTEND_URL}/auth/success`);
   }
 );
-
-
 
 module.exports = authRouter;

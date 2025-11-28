@@ -4,6 +4,8 @@ const { userAuth } = require("../middlewares/auth");
 const profileRouter = express.Router();
 const { validateProfileEditData } = require("../utils/validate");
 const bcrypt = require("bcrypt");
+const upload = require("../middlewares/upload");
+const cloudinary = require("../config/cloudinary");
 
 profileRouter.get("/profile/view", userAuth, async (req, res) => {
   try {
@@ -14,33 +16,65 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
   }
 });
 
-profileRouter.patch("/profile/edit", userAuth, async (req, res) => {
-  try {
-    if (!validateProfileEditData(req)) {
-      throw new Error("Invalid updates!");
-    }
-    const loggedInUser = req.user;
-    Object.keys(req.body).forEach((field) => {
-      loggedInUser[field] = req.body[field];
-    });
-    await loggedInUser.save();
-    res.json({
-      message: `${loggedInUser.firstName}, Your profile updated successfully`,
-      user: loggedInUser,
-    });
-  } catch (err) {
-    res.status(400).send("Error updating profile: " + err.message);
-  }
-});
+profileRouter.patch(
+  "/profile/edit",
+  userAuth,
+  upload.single("photo"), // allow file uploads
+  async (req, res) => {
+    try {
+      if (!validateProfileEditData(req)) {
+        throw new Error("Invalid updates!");
+      }
 
-profileRouter.patch("/profile/password", userAuth, async (req, res) => {  
+      const loggedInUser = req.user;
+      let photoURL = loggedInUser.photoURL;
+
+      // If user uploaded a new photo, send it to Cloudinary
+      if (req.file) {
+        const result = await new Promise((resolve, reject) => {
+          const stream = cloudinary.uploader.upload_stream(
+            { folder: "devmatch-users" },
+            (error, result) => {
+              if (error) reject(error);
+              else resolve(result);
+            }
+          );
+          stream.end(req.file.buffer);
+        });
+
+        photoURL = result.secure_url;
+      }
+
+      // Update all fields
+      Object.keys(req.body).forEach((field) => {
+        loggedInUser[field] = req.body[field];
+      });
+
+      // Save new photoURL
+      if (req.file) {
+        loggedInUser.photoURL = photoURL;
+      }
+
+      await loggedInUser.save();
+
+      res.json({
+        message: `${loggedInUser.firstName}, your profile was updated successfully`,
+        user: loggedInUser,
+      });
+    } catch (err) {
+      res.status(400).send("Error updating profile: " + err.message);
+    }
+  }
+);
+
+profileRouter.patch("/profile/password", userAuth, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
     if (!oldPassword || !newPassword) {
       throw new Error("Both old and new passwords are required");
     }
-    if(oldPassword === newPassword){
-        throw new Error("New password must be different from the old password");
+    if (oldPassword === newPassword) {
+      throw new Error("New password must be different from the old password");
     }
     const loggedInUser = req.user;
     const isMatch = await bcrypt.compare(oldPassword, loggedInUser.password);
@@ -50,7 +84,10 @@ profileRouter.patch("/profile/password", userAuth, async (req, res) => {
     const hashPassword = await bcrypt.hash(newPassword, 10);
     loggedInUser.password = hashPassword;
     await loggedInUser.save();
-    res.json({ message: "Password updated successfully",data:loggedInUser.password });
+    res.json({
+      message: "Password updated successfully",
+      data: loggedInUser.password,
+    });
   } catch (err) {
     res.status(400).send(err.message);
   }

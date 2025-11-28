@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema(
     googleId: {
       type: String,
       unique: true,
-      sparse: true, // important: allows either googleId OR email
+      sparse: true, 
     },
     firstName: {
       type: String,
@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 20,
       required: function () {
-        return !this.googleId; // required only if not a Google user
+        return !this.googleId; 
       },
     },
     lastName: {
@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
     },
     name: {
-      type: String, // used for Google full name
+      type: String,
       trim: true,
     },
     emailId: {
@@ -36,7 +36,7 @@ const userSchema = new mongoose.Schema(
       trim: true,
       lowercase: true,
       required: function () {
-        return !this.googleId; // required only if not a Google user
+        return !this.googleId; 
       },
       validate(value) {
         if (!validator.isEmail(value)) {
@@ -49,11 +49,10 @@ const userSchema = new mongoose.Schema(
       required: true,
       trim: true,
       required: function () {
-        return !this.googleId; // required only if not a Google user
+        return !this.googleId; 
       },
       validate: {
         validator: function (value) {
-          // Skip validation for Google OAuth users
           if (this.googleId) return true;
           return validator.isStrongPassword(value);
         },
