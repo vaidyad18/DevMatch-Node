@@ -5,26 +5,15 @@ const jwt = require("jsonwebtoken");
 
 const userSchema = new mongoose.Schema(
   {
-    googleId: {
-      type: String,
-      unique: true,
-      sparse: true, 
-    },
     firstName: {
       type: String,
       required: true,
       trim: true,
       minlength: 3,
       maxlength: 20,
-      required: function () {
-        return !this.googleId; 
-      },
+      required: true,
     },
     lastName: {
-      type: String,
-      trim: true,
-    },
-    name: {
       type: String,
       trim: true,
     },
@@ -35,9 +24,7 @@ const userSchema = new mongoose.Schema(
       sparse: true,
       trim: true,
       lowercase: true,
-      required: function () {
-        return !this.googleId; 
-      },
+      required: true,
       validate(value) {
         if (!validator.isEmail(value)) {
           throw new Error("Email is invalid");
@@ -48,12 +35,9 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      required: function () {
-        return !this.googleId; 
-      },
+      required: true,
       validate: {
         validator: function (value) {
-          if (this.googleId) return true;
           return validator.isStrongPassword(value);
         },
         message: "Password is not strong enough",
@@ -142,7 +126,7 @@ const userSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-  }
+  },
 );
 
 userSchema.index({ firstName: 1, lastName: 1 });
@@ -158,7 +142,7 @@ userSchema.methods.validatePassword = async function (passwordInputByUser) {
   const hashedPassword = user.password;
   const isPassordValid = await bcrypt.compare(
     passwordInputByUser,
-    hashedPassword
+    hashedPassword,
   );
   return isPassordValid;
 };

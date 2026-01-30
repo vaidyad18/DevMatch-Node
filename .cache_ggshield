@@ -1,1 +1,8 @@
-{"last_found_secrets": [{"match": "a047a19df6671eb09aae013f42bb6d03ff697a7efe03e205ad7da2a6e27c8c24", "name": "Generic Password - c:\\Users\\Vaidya Dandriyal\\OneDrive\\Desktop\\Projects\\Full-Stack\\DevMatch\\src\\app.js"}]}
+{
+  "last_found_secrets": [
+    {
+      "match": "a047a19df6671eb09aae013f42bb6d03ff697a7efe03e205ad7da2a6e27c8c24",
+      "name": "Generic Password - c:\\Users\\Vaidya Dandriyal\\OneDrive\\Desktop\\Projects\\Full-Stack\\DevMatch\\src\\app.js"
+    }
+  ]
+}
