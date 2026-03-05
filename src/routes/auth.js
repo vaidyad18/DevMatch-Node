@@ -3,8 +3,6 @@ const User = require("../models/user");
 const { validateSignupData } = require("../utils/validate");
 const authRouter = express.Router();
 const bcrypt = require("bcrypt");
-const passport = require("passport");
-const jwt = require("jsonwebtoken");
 
 const cookieOptions = {
   httpOnly: true,
@@ -54,7 +52,7 @@ authRouter.post("/login", async (req, res) => {
       const token = await user.getJWT();
       res.cookie("token", token, cookieOptions);
 
-      res.send(user);
+      res.send(user); 
     } else {
       throw new Error("Invalid login credentials");
     }

@@ -19,7 +19,7 @@ profileRouter.get("/profile/view", userAuth, async (req, res) => {
 profileRouter.patch(
   "/profile/edit",
   userAuth,
-  upload.single("photo"), // allow file uploads
+  upload.single("photo"),
   async (req, res) => {
     try {
       if (!validateProfileEditData(req)) {
@@ -37,7 +37,7 @@ profileRouter.patch(
             (error, result) => {
               if (error) reject(error);
               else resolve(result);
-            }
+            },
           );
           stream.end(req.file.buffer);
         });
@@ -64,7 +64,7 @@ profileRouter.patch(
     } catch (err) {
       res.status(400).send("Error updating profile: " + err.message);
     }
-  }
+  },
 );
 
 profileRouter.patch("/profile/password", userAuth, async (req, res) => {
