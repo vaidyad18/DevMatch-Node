@@ -14,6 +14,8 @@ const paymentRouter = require("./routes/payment");
 const initializeSocketConnection = require('./utils/socket');
 const chatRouter = require('./routes/chat');
 const passport = require('passport');
+require("./config/passport");
+const googleAuthRouter = require("./routes/googleAuth");
 
 app.use(
   cors({
@@ -36,6 +38,7 @@ app.use("/",requestRouter);
 app.use("/",userRouter);
 app.use("/",paymentRouter);
 app.use("/",chatRouter);
+app.use("/",googleAuthRouter);
 
 connectDB().then(() => {
   console.log("Database connected successfully");
