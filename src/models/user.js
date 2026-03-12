@@ -34,14 +34,7 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: true,
-      trim: true,
       required: true,
-      validate: {
-        validator: function (value) {
-          return validator.isStrongPassword(value);
-        },
-        message: "Password is not strong enough",
-      },
     },
     age: {
       type: Number,
@@ -134,7 +127,7 @@ userSchema.index({ firstName: 1, lastName: 1 });
 userSchema.methods.getJWT = async function () {
   const user = this;
   const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-    expiresIn: "1d",
+    expiresIn: "7d",
   });
   return token;
 };

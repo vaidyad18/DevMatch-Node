@@ -50,6 +50,10 @@ profileRouter.patch(
         loggedInUser[field] = req.body[field];
       });
 
+      if (req.body.mobile === "" || req.body.mobile === null) {
+        loggedInUser.mobile = undefined;
+      }
+
       // Save new photoURL
       if (req.file) {
         loggedInUser.photoURL = photoURL;
