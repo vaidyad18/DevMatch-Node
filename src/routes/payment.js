@@ -128,7 +128,10 @@ paymentRouter.post("/payment/verify", userAuth, async (req, res) => {
 
 paymentRouter.get("/premium/verify", userAuth, async (req, res) => {
   try {
-    return res.json({ isPremium: !!req.user?.isPremium });
+    return res.json({ 
+      isPremium: !!req.user?.isPremium,
+      membershipType: req.user?.membershipType 
+    });
   } catch (err) {
     return res.status(400).json({
       isPremium: false,
